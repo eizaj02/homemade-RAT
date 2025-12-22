@@ -15,6 +15,7 @@ import pygame
 from PIL import ImageGrab
 import numpy as np
 import shutil
+import pyaudio
 
 sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
