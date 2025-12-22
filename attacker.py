@@ -5,6 +5,8 @@ import struct
 import pickle
 import cv2
 import threading
+import sys
+import pyaudio
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.bind(('192.168.18.210', 9999))
