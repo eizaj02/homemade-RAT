@@ -34,7 +34,7 @@ RAT made from fully 100% python language
   > numpy
 
 About:
- - This RAT only works on windows but the server can be run on linu/windows etc.
+ - This RAT only works on windows but the server can be run on linux/windows etc.
  - due to lack of resources & i'm a bit forking others do, it's features doesn't seem so stable, there's many bugs that i still working to fix it
  - 1. Download error
    2. Can't start the camera more than 1x
