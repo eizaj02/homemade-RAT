@@ -9,7 +9,7 @@ RAT made from fully 100% python language
   >
   > camera streaming/snap
   >
-  > persistence/maintaining access
+  > persistence (maintaining access)
   >
   > mic, keyboard, and cursor controller
 
