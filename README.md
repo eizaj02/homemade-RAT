@@ -13,7 +13,7 @@
   >
   > mic, keyboard, and cursor controller
 
-* The required modules for the server(attacker) such as
+* The required modules for the server(attacker):
   > pyaudio
   >
   > colorama (optional to use)
@@ -22,7 +22,7 @@
   >
   > cv2
 
-* The required modules for the client(target) such as
+* The required modules for the client(target):
   > cv2
   >
   > pyautogui
