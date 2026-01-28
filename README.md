@@ -1,4 +1,4 @@
-RAT made from fully 100% python language
+# RAT made from fully 100% python language
 
 * With functions such as
   > Download/Upload file command (Download only up to 3,5mb)
