@@ -38,9 +38,8 @@ About:
  - due to lack of resources & i'm a bit forking others do, it's features doesn't seem so stable, there's many bugs that i still working to fix it:
 > 1 download error
 >
-> 2 can't screen share more than 1x
+> 2 can't stream cam more than 1x
 > 
-> 3 can't stream cam more than 1x
 
  - You can modify the code/add some new functionality, and change the language
  - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking sometimes finding it especially it's custom-made Trojan
