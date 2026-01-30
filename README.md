@@ -43,7 +43,7 @@ About:
 > 3 can't stream cam more than 1x
 
  - You can modify the code/add some new functionality, and change the language
- - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking some of time finding it especially it's custom-made Trojan
+ - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking sometimes finding it especially it's custom-made Trojan
  - If you want to do a persistence/run the **target.py** on another machine that has no python, you have to compile the **target.py** into executable with pyinstaller
 
 ```bash
