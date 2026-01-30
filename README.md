@@ -36,11 +36,21 @@
 About:
  - This RAT only works on windows but the server can be run on linux/windows etc.
  - due to lack of resources & i'm a bit forking others do, it's features doesn't seem so stable, there's many bugs that i still working to fix it:
- - 1. Download error
-   2. Can't start the camera more than 1x
-   3. Can't screen share more than 1x
-   4. When you do persistence, the input won't showing up again
+> 1 download error
+>
+> 2 can't screen share more than 1x
+> 
+> 3 can't stream cam more than 1x
 
  - You can modify the code/add some new functionality, and change the language
- - I cannot guarantee that this RAT is 100% FUD but due
- - to lack of database & signature, antivirus might be taking a bit of time finding it especially it's custom-made Trojan
+ - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking a bit of time finding it especially it's custom-made Trojan
+ - If you want to do a persistence/run the **target.py** on another machine that has no python, you have to compile the **target.py** into executable with pyinstaller
+
+```bash
+pip install pyinstaller
+```
+ - or
+
+```bash
+pip install auto-py-to-exe
+```
