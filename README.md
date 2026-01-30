@@ -42,4 +42,5 @@ About:
    4. When you do persistence, the input won't showing up again
 
  - You can modify the code/add some new functionality, and change the language
- - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking a bit of time finding it especially it's custom-made Trojan
+ - I cannot guarantee that this RAT is 100% FUD but due
+ - to lack of database & signature, antivirus might be taking a bit of time finding it especially it's custom-made Trojan
