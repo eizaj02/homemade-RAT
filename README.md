@@ -33,17 +33,19 @@
   >
   > numpy
 
-About:
- - This RAT only works on windows but the server can be run on linux/windows etc.
- - due to lack of resources & i'm a bit forking others do, it's features doesn't seem so stable, there's many bugs that i still working to fix it:
-> 1 download error
+# About:
+This RAT only works on windows but the server can be run on linux/windows etc.  
+Due to lack of resources & i'm a bit forking others do, it's features doesn't seem so stable, there's many bugs that i still working to fix it:
+> 1 Download error
 >
-> 2 can't stream cam more than 1x
+> 2 Can't stream cam more than 1x
 > 
 
- - You can modify the code/add some new functionality, and change the language
- - I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking sometimes finding it especially it's custom-made Trojan
- - If you want to do a persistence/run the **target.py** on another machine that has no python, you have to compile the **target.py** into executable with pyinstaller
+You can modify the code or add some new functionality, and change the language  
+
+I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking sometimes finding it especially it's custom-made Trojan  
+
+If you want to do a persistence or run the **target.py** on another machine that has no python, you have to compile the **target.py** into executable with pyinstaller
 
 ```bash
 pip install pyinstaller
