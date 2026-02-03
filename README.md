@@ -50,8 +50,12 @@ If you want to do a persistence or run the **target.py** on another machine that
 ```bash
 pip install pyinstaller
 ```
- - or
+
+for CLI version or  
+
 
 ```bash
 pip install auto-py-to-exe
 ```
+
+for GUI version
