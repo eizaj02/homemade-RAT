@@ -153,6 +153,8 @@ def download_file(namafile):
     bufsize = 65536
     size_data = sok.recv(8)
     filesize = struct.unpack("Q", size_data)[0]
+    if filesize == 0:
+        return
     recv = 0
     with open(namafile, 'wb') as file:
         while recv < filesize:
@@ -164,6 +166,9 @@ def download_file(namafile):
 
 def upload_file(namafile):
     bufsize = 65536
+    if not os.path.exists(namafile):
+        sok.sendall(struct.pack("Q", 0))
+        return
     filesize = os.path.getsize(namafile)
     sok.sendall(struct.pack("Q", filesize))
     with open(namafile, 'rb') as f:
