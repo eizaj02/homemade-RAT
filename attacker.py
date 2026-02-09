@@ -185,6 +185,10 @@ def stream_cam():
 
 def upload_file(namafile):
      bufsize = 65536
+     if not os.path.exists(namafile):
+         _target.sendall(struct.pack("Q", 0))
+         print(Fore.RED+'File not found')
+         return
      filesize = os.path.getsize(namafile)
      _target.sendall(struct.pack("Q", filesize))
      with open(namafile, 'rb') as f:
@@ -198,6 +202,9 @@ def download_file(namafile):
      bufsize = 65536
      size_data = _target.recv(8)
      filesize = struct.unpack("Q", size_data)[0]
+     if filesize == 0:
+         print(Fore.RED+'File not found')
+         return
      recv = 0
      with open(namafile, 'wb') as file:
         while recv < filesize:
