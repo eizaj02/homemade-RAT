@@ -11,7 +11,7 @@
   >
   > persistence (maintaining access)
   >
-  > mic, keyboard, and cursor controller
+  > mic recording, and keystroke
 
 * The required modules for the server(attacker):
   > pyaudio
