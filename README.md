@@ -34,7 +34,7 @@
   > numpy
 
 # About:
-This RAT is only a PoC project, this still has alot of Errors and won't work if you run the client on different computers unless you did a tunneling and a port forwarding.  
+This RAT is only a PoC project, this still has alot of Errors and won't work if you run the client on different computers unless you did a tunneling or a port forwarding.  
 If you wanna run the client-side in exe file, you can use pyinstaller for the CLI version, and auto-py-to-exe for the GUI version.  
 
 ```bash
