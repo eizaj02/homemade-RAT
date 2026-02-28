@@ -34,10 +34,8 @@
   > numpy
 
 # About:
-This RAT only works on windows but the server can be run on linux/windows etc. 
-You can modify the code or add some new functionality, and change the language  
-I cannot guarantee that this RAT is 100% FUD but due to lack of database & signature, antivirus might be taking sometimes finding it especially it's custom-made Trojan  
-If you want to do a persistence or run the **target.py** on another machine that has no python, you have to compile the **target.py** into executable with pyinstaller
+This RAT is only a PoC project, this still has alot of Errors and won't work if you run the client on different computers unless you did a tunneling and a port forwarding.  
+If you wanna run the client-side in exe file, you can use pyinstaller for the CLI version, and auto-py-to-exe for the GUI version.  
 
 ```bash
 pip install pyinstaller
