@@ -314,27 +314,6 @@ def shellc():
                    
                    -send_key  >> mengetikan keyboard
                    ================================ 
-                   
-                     basic windows system command:
-                   =================================
-                   -cd        >> berpindah direktori
-
-                   -mkdir     >> membuat direktori
-                   
-                   -rmdir     >> menghapus direktori
-                   
-                   -del       >> menghapus file 
-                   
-                   -whoami    >> nama user
-                   
-                   -dir       >> melihat list file/direktori
-                   
-                   -copy      >> memindahkan file ke direktori lain
-                   
-                   -ren       >> mengubah nama file
-                   
-                   -type      >> menampilkan isi file
-                   ================================= 
                    """)
           elif perintah == 'rec_audio':
              receive_and_save()
