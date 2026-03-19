@@ -63,3 +63,29 @@ python target.py
 
 ## WARNING ⚠
 I do not take any responsibility if someone has installed this Trojan on another person computer, if there's any person who got their data stolen. Not my fault, not my responsibility to apologize.
+* DETECTION ⚠
+> High network usage
+> 
+> High cpu usage
+> 
+> Unknown process pops up in task manager
+> 
+> High ram usage
+> 
+> Netstat cmd command
+> 
+> VirusTotal
+> 
+> Strange Behaviour
+> 
+> Heuristic detection
+> 
+> Registry
+> 
+> Strange text file
+> 
+> Hash
+> 
+> etc.
+>
+So the point is there's many ways to detect it, easy asf, but if just the RAT got it hex edited or added a trusted process icon and got put in the trusted folder, it still hard to detect. So don't ever install this on someone computer unless its a test and the owner knows it, that'll be fine. 
