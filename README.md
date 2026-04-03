@@ -62,7 +62,6 @@ python target.py
 ```
 
 ## WARNING ⚠
-I do not take any responsibility if someone has installed this Trojan on another person computer.
 * DETECTION ⚠
 > High network usage
 > 
